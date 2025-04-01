@@ -183,6 +183,24 @@ const response = await client.send(initiateAuthCommand);
 - 토큰은 클라이언트 측에 안전하게 저장됩니다
 - 민감한 인증 정보는 환경 변수로 관리됩니다
 
+## 부가 정보
+
+### Cognito 사용자 관리와 데이터베이스 통합
+
+AWS Cognito는 사용자 관리 시스템을 자체적으로 제공하기 때문에 기본적인 인증 및 사용자 정보 관리를 위한 별도의 RDS(관계형 데이터베이스)를 구축할 필요가 없습니다. AWS 콘솔의 Cognito 서비스 > User Pool > Users 탭에서 등록된 사용자 목록과 상세 정보를 관리할 수 있습니다.
+
+**Cognito만으로 충분한 경우**:
+- 기본적인 사용자 인증(로그인, 회원가입, 비밀번호 관리)
+- 표준 사용자 프로필 정보 저장
+- 소셜 로그인 연동
+
+**추가 데이터베이스가 필요한 경우**:
+- 사용자와 연결된 복잡한 관계형 데이터 저장
+- 사용자 활동 로그, 상세 프로필 등 추가 정보 관리
+- 고급 검색 및 분석 기능
+
+실제 서비스 구현 시에는 Cognito를 인증 서비스로 사용하고, 추가적인 사용자 관련 데이터는 별도 데이터베이스에 저장하는 하이브리드 접근 방식이 일반적입니다.
+
 ## 참고 자료
 
 - [AWS Cognito 개발자 가이드](https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html)
