@@ -57,6 +57,7 @@ export interface AuthState {
  * 이메일 인증 폼 데이터 인터페이스
  */
 export interface VerifyEmailFormData {
+  email: string;    // 인증할 사용자 이메일
   code: string;      // 이메일로 전송된 인증 코드
 }
 

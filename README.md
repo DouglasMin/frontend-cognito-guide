@@ -1,21 +1,66 @@
 # AWS Cognito 인증 구현 예제 프로젝트
 
-이 프로젝트는 AWS Cognito와 AWS Amplify SDK를 활용하여 웹 애플리케이션에서 사용자 인증 시스템을 구현하는 방법을 보여주는 예제입니다.
+이 프로젝트는 AWS SDK와 Amplify를 함께 사용하여 Cognito 인증을 구현하는 예제입니다.
 
-## 기능 구현
+## 환경 변수 설정
 
-- 사용자 등록 (회원가입)
-- 이메일 인증
-- 로그인/로그아웃
-- 토큰 기반 인증 관리
-- 보호된 라우트 설정
-- 사용자 프로필 조회
+`.env` 파일에 다음 변수들을 설정하세요:
+
+```bash
+VITE_COGNITO_REGION=ap-northeast-2
+VITE_COGNITO_USER_POOL_ID=your_user_pool_id
+VITE_COGNITO_CLIENT_ID=your_client_id
+VITE_COGNITO_CLIENT_SECRET=your_client_secret  # 앱 클라이언트 시크릿 사용 시에만 필요
+```
+
+## 설치 및 실행
+
+```bash
+# 패키지 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
+```
+
+## AWS Cognito 설정
+
+1. AWS Cognito 콘솔에서 앱 클라이언트 설정을 확인하세요:
+   - "App integration" 탭 > 앱 클라이언트 선택
+   - "Client secret" 섹션에서 시크릿 사용 여부 확인
+   - 시크릿을 사용하는 경우 `.env`에 추가
+
+2. 필수 사용자 속성:
+   - email
+   - given_name
 
 ## 기술 스택
 
 - **프론트엔드**: React, TypeScript, Vite
 - **인증 서비스**: AWS Cognito
-- **API 통신**: AWS SDK, AWS Amplify
+- **API 통신**: 
+  - AWS SDK for JavaScript v3 (@aws-sdk/client-cognito-identity-provider)
+  - AWS Amplify Auth (@aws-amplify/auth)
+
+## 주요 기능
+
+- **회원가입**: `CognitoIdentityProviderClient`의 `SignUpCommand` 사용
+- **이메일 인증**: `ConfirmSignUpCommand`, `ResendConfirmationCodeCommand` 사용
+- **로그인**: `InitiateAuthCommand` 사용 (USER_PASSWORD_AUTH 플로우)
+- **로그아웃**: `GlobalSignOutCommand` 사용
+- **사용자 정보 조회**: `GetUserCommand` 사용
+
+## 구현 특징
+
+- Amplify Auth의 간편한 인증 API 활용
+- AWS SDK를 통한 세밀한 인증 제어 가능
+- SECRET_HASH 계산 로직 포함 (앱 클라이언트 시크릿 사용 시)
+
+## 주의사항
+
+1. **환경 변수**: `.env` 파일이 올바르게 설정되어 있는지 확인하세요.
+2. **시크릿 사용**: 앱 클라이언트 시크릿 사용 시 모든 인증 요청에 SECRET_HASH를 포함해야 합니다.
+3. **토큰 관리**: AccessToken, IdToken, RefreshToken을 안전하게 관리해야 합니다.
 
 ## 중요한 파일 및 디렉토리 구조
 
@@ -50,7 +95,7 @@ Amplify 라이브러리를 초기화하고 AWS Cognito 연결을 설정합니다
 ### 2. 인증 컴포넌트
 
 - **Register.tsx**: 회원가입 양식과 Cognito 사용자 등록 로직
-- **VerifyEmail.tsx**: 이메일 확인 코드 입력 및 검증 로직
+- **VerifyEmail.tsx**: 이메일 인증 코드 입력 및 검증 로직
 - **Login.tsx**: 로그인 양식과 인증 처리 로직
 - **ProtectedRoute.tsx**: 인증된 사용자만 접근 가능하도록 라우트 보호
 

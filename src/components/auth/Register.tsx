@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signUp } from 'aws-amplify/auth';
 import { RegisterFormData } from '../../types/auth';
 import { handleAuthError } from '../../hooks/useAuth';
+import { calculateSecretHash } from '../../utils/secretHash';
+import { CognitoIdentityProviderClient, SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
 
 /**
  * 회원가입 컴포넌트
@@ -55,21 +56,50 @@ const Register: React.FC = () => {
     try {
       console.log('회원가입 시도 중...');
       
-      // AWS Amplify signUp API 호출
-      // 사용자 등록 요청 전송 및 결과 처리
-      const result = await signUp({
-        username: formData.email,
-        password: formData.password,
-        options: {
-          // 사용자 기본 속성 설정 - 이메일, 이름 등록
-          userAttributes: {
-            email: formData.email,
-            given_name: formData.name
-          },
-          // 자동 로그인 비활성화 - 이메일 인증 후 로그인 필요
-          autoSignIn: { enabled: false }
-        }
+      // 환경 변수에서 Cognito 설정 가져오기
+      const region = import.meta.env.VITE_COGNITO_REGION || 'ap-northeast-2';
+      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+      const clientSecret = import.meta.env.VITE_COGNITO_CLIENT_SECRET;
+      
+      if (!clientId) {
+        throw new Error('Cognito 클라이언트 ID가 설정되지 않았습니다.');
+      }
+      
+      // SECRET_HASH 계산
+      const secretHash = calculateSecretHash(formData.email, clientId, clientSecret);
+      
+      // 디버깅 정보 출력
+      console.log('회원가입 요청 정보 (디버깅):', {
+        region,
+        clientIdLength: clientId.length,
+        email: formData.email,
+        secretHashLength: secretHash.length,
+        userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID
       });
+      
+      // AWS SDK 클라이언트 생성
+      const client = new CognitoIdentityProviderClient({ region });
+      
+      // 회원가입 명령 생성
+      const signUpCommand = new SignUpCommand({
+        ClientId: clientId,
+        Username: formData.email,
+        Password: formData.password,
+        SecretHash: secretHash,
+        UserAttributes: [
+          {
+            Name: 'email',
+            Value: formData.email
+          },
+          {
+            Name: 'given_name',
+            Value: formData.name
+          }
+        ]
+      });
+      
+      // 회원가입 요청 전송
+      const result = await client.send(signUpCommand);
       
       console.log('회원가입 결과:', result);
       
