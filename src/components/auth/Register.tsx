@@ -77,19 +77,28 @@ const Register: React.FC = () => {
         userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID
       });
       
+      // 이메일 주소에 타임스탬프 추가하여 중복 방지 (테스트용)
+      const timestamp = new Date().getTime();
+      const uniqueEmail = formData.email.replace('@', `+${timestamp}@`);
+      
+      console.log('고유 이메일 생성:', {
+        originalEmail: formData.email,
+        uniqueEmail: uniqueEmail
+      });
+      
       // AWS SDK 클라이언트 생성
       const client = new CognitoIdentityProviderClient({ region });
       
       // 회원가입 명령 생성
       const signUpCommand = new SignUpCommand({
         ClientId: clientId,
-        Username: formData.email,
+        Username: uniqueEmail,
         Password: formData.password,
         SecretHash: secretHash,
         UserAttributes: [
           {
             Name: 'email',
-            Value: formData.email
+            Value: uniqueEmail
           },
           {
             Name: 'given_name',
@@ -104,7 +113,7 @@ const Register: React.FC = () => {
       console.log('회원가입 결과:', result);
       
       // 이메일 인증 페이지로 이동 (사용자 이메일 전달)
-      navigate('/verify-email', { state: { email: formData.email } });
+      navigate('/verify-email', { state: { email: uniqueEmail } });
     } catch (error: any) {
       console.error('회원가입 오류:', error);
       setError(handleAuthError(error));

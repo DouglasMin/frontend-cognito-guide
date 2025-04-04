@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 
 const Home: React.FC = () => {
-  const { isAuthenticated, user, loading, logout } = useAuth();
+  const { isAuthenticated, user, isLoading, logout } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return <div className="loading">로딩 중...</div>;
   }
 
@@ -15,7 +15,7 @@ const Home: React.FC = () => {
       
       {isAuthenticated ? (
         <div className="authenticated-content">
-          <h2>안녕하세요, {user?.givenName}님!</h2>
+          <h2>안녕하세요, {user?.given_name}님!</h2>
           <p>이메일: {user?.email}</p>
           <div className="button-group">
             <Link to="/dashboard" className="button">대시보드</Link>

@@ -14,31 +14,27 @@ console.log('Cognito 설정 확인 (디버깅):', {
   domainPrefix: import.meta.env.VITE_COGNITO_DOMAIN_PREFIX || '설정되지 않음'
 });
 
-// AWS CLI 프로필 설정 (smuwchat 프로필 사용)
-// 이 부분은 AWS CLI 환경에서만 동작합니다.
-// 로컬 개발 환경에서는 .aws/credentials 또는 .aws/config 파일에 smuwchat 프로필이 설정되어 있어야 합니다.
+// .env 파일에서 직접 설정 가져오기 (프로필 사용 X)
 const awsExports = {
   Auth: {
     Cognito: {
       userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
       userPoolClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
+      identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID,
       region: import.meta.env.VITE_COGNITO_REGION || 'ap-northeast-2',
       
       // 클라이언트 시크릿 설정
       // 주의: Amplify V6에서는 이 설정으로 시크릿을 추가하는 것 외에도
       // API 호출 시 직접 SECRET_HASH를 전달해야 합니다.
       clientSecret: import.meta.env.VITE_COGNITO_CLIENT_SECRET
-    },
-    credentialProvider: {
-      // AWS CLI 프로필 smuwchat 사용 설정
-      profileName: 'smuwchat'
     }
+    // credentialProvider 설정 제거 (AWS CLI 프로필 사용 안함)
   }
 };
 
 try {
   Amplify.configure(awsExports);
-  console.log('Amplify configured successfully with smuwchat profile');
+  console.log('Amplify configured successfully with .env settings');
 } catch (error) {
   console.error('Error configuring Amplify:', error);
 }
